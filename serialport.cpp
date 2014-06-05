@@ -30,8 +30,6 @@ SerialPort::SerialPort()
     m_timer2 = new QTimer();
     m_timer2->setInterval(0);
 
-    connect(m_timer1, SIGNAL(timeout()), this, SLOT(writeToFile()));
-    connect(m_timer2, SIGNAL(timeout()), this, SLOT(readFromFile()));
 }
 
 SerialPort::~SerialPort()
@@ -50,6 +48,8 @@ void SerialPort::connectInterface()
     }else{
         QString stat("Interface connected on port " + this->portName());
         emit status(stat, 10000);
+        connect(m_timer1, SIGNAL(timeout()), this, SLOT(clearBuffer()));
+        m_timer1->start();
     }
 }
 
@@ -70,9 +70,7 @@ void SerialPort::calibrate()
 
 void SerialPort::start()
 {
-    QString stat = "Trying to open serial port " + this->portName();
-    emit status(stat, 10000);
-
+    QString stat = "Acquisition started";
 
     if(!this->isOpen())
     {
@@ -83,8 +81,13 @@ void SerialPort::start()
 
     else
     {
+        disconnect(m_timer1, SIGNAL(timeout()), this, SLOT(clearBuffer()));
+        connect(m_timer1, SIGNAL(timeout()), this, SLOT(writeToFile()));
+        connect(m_timer2, SIGNAL(timeout()), this, SLOT(readFromFile()));
         m_timer1->start();
         m_timer2->start();
+
+        emit status(stat, 10000);
     }
 }
 
@@ -139,4 +142,9 @@ void SerialPort::readFromFile(void)
 
 }
 
+
+void SerialPort::clearBuffer()
+{
+    this->readAll();
+}
 

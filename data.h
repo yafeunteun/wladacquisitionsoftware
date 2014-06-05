@@ -1,8 +1,9 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include <vector>
+#include <QVector>
 #include <QObject>
+#include <set>
 
 class Data : public QObject
 {
@@ -33,13 +34,15 @@ private:
     static Data *instance;
 
     int m_current = 0; /* current index */
-    std::vector<Curve> m_curves;
+    QVector<Curve> m_curves;
     bool m_reverse = false;
+    bool m_rise = true;
 
 public slots:
     void recordData(float, float, float);
     void save(QString& filename);
     void onReverse();
+    void deleteEntry(std::set<int>);
 
 signals:
     void newCurve(std::vector<float>);

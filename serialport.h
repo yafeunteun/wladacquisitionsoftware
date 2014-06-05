@@ -43,6 +43,9 @@ private:
     ~SerialPort();
     static SerialPort *instance;
 
+private slots:
+    void clearBuffer();
+
 };
 
 

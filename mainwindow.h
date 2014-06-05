@@ -11,6 +11,7 @@
 #include <QButtonGroup>
 #include <QGroupBox>
 #include <QAction>
+#include <vector>
 
 #include "acquisitionsettings.h"
 
@@ -69,10 +70,10 @@ private:
 public slots:
     void onNewCurve(std::vector<float>);
     void save();
-    /*tmp */
     void onNewConfiguration();
     void onError(QString&);
     void onStatus(QString&);
+    void deleteEntry();
 
 signals:
     void incReps(int);

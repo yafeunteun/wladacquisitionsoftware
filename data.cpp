@@ -32,7 +32,7 @@ void Data::recordData(float t, float dist, float f)
 {
     static float last_distance = 0.;
     static float last_time = 0.;
-    static bool rise = true;
+
 
     /* We consider only positive data */
     if(m_reverse)
@@ -41,8 +41,8 @@ void Data::recordData(float t, float dist, float f)
         return;
 
     /* End of the positive part of the movement */
-    if((dist < last_distance) && (rise)){
-        rise = false;
+    if((dist < last_distance) && (m_rise)){
+        m_rise = false;
 
         /* function find velocity peak and time to peak*/
         /* function average */
@@ -69,12 +69,12 @@ void Data::recordData(float t, float dist, float f)
     }
 
     /* End of negative part of the movement */
-    else if((dist > last_distance) && (!rise)){
+    else if((dist > last_distance) && (!m_rise)){
         Curve c;
         m_curves.push_back(c);
         ++m_current;
 
-        rise = true;
+        m_rise = true;
 
 
     }else{  /* Not a new curve, we simply add the new data */
@@ -97,6 +97,16 @@ void Data::recordData(float t, float dist, float f)
 
 void Data::save(QString& filename)
 {
+
+    /* To keep the current state of the acquisition */
+
+    Curve c;
+    m_curves.push_back(c);
+    ++m_current;
+    m_rise = true;
+
+
+
     uint indexCurve = 0;
 
     std::ofstream fstream(filename.toStdString(), std::ios::out | std::ios::trunc);
@@ -125,5 +135,17 @@ void Data::save(QString& filename)
 void Data::onReverse()
 {
     m_reverse = !m_reverse;
+}
+
+
+void Data::deleteEntry(std::set<int> indexes)
+{
+    uint i = 0;
+    for(int index : indexes){
+        m_curves.removeAt(index-i);
+        ++i;
+    }
+
+    m_current -= indexes.size();
 }
 

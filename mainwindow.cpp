@@ -15,6 +15,7 @@
 #include <QDir>
 #include <QStatusBar>
 #include <QMessageBox>
+#include <set>
 
 
 
@@ -112,6 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(incReps(int)), m_nbReps, SLOT(display(int)));
     connect(Data::getInstance(), SIGNAL(newCurve(std::vector<float>)), this, SLOT(onNewCurve(std::vector<float>)));
     connect(m_saveAll, SIGNAL(clicked()), this, SLOT(save()));
+    connect(m_deleteSelected, SIGNAL(clicked()), this, SLOT(deleteEntry()));
     connect(SerialPort::getInstance(), SIGNAL(error(QString&)), this, SLOT(onError(QString&)));
     connect(SerialPort::getInstance(), SIGNAL(status(QString&, int)), this, SLOT(onStatus(QString&)));
 }
@@ -331,3 +333,32 @@ void MainWindow::onNewConfiguration()
 }
 
 
+void MainWindow::deleteEntry()
+{
+    uint i = 0;
+    QList<QTableWidgetItem*> list = m_table->selectedItems();
+    std::set<int> indexes;
+
+    for(QTableWidgetItem* item : list)
+    {
+        indexes.insert(item->row());
+    }
+
+    for(int index : indexes)
+    {
+        //std::cout<<index<<std::endl;
+        m_table->removeRow(index-i);
+        ++i;
+    }
+
+    m_nbCurve -= indexes.size();
+
+
+    for(ushort i = 0; i < m_table->rowCount(); ++i)
+    {
+        m_table->setItem(i, 0, new QTableWidgetItem(QString::number(i+1)));
+    }
+
+    Data::getInstance()->deleteEntry(indexes);
+
+}
