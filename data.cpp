@@ -32,6 +32,7 @@ void Data::recordData(float t, float dist, float f)
 {
     static float last_distance = 0.;
     static float last_time = 0.;
+    static float last_velocity = 0.;
 
 
     /* We consider only positive data */
@@ -52,12 +53,15 @@ void Data::recordData(float t, float dist, float f)
         m_curves[m_current].distanceP = m_curves[m_current].distance[m_curves[m_current].distance.size()-1];
 
 
+        // delta_t holds the value of the duration of the movement
         float delta_t = m_curves[m_current].time[m_curves[m_current].time.size()-1]-m_curves[m_current].time.at(0);
+        // delta_d hold the value of the distance covered during the movement
         float delta_d = m_curves[m_current].distance[m_curves[m_current].distance.size()-1]-m_curves[m_current].distance.at(0);
+        // The average speed during the movement is its distance on its duration : v = d/t
         m_curves[m_current].averageP = delta_d / delta_t;
 
         std::vector<float> vect;
-        vect.push_back(m_curves[m_current].time[0]/1000000);
+        vect.push_back(m_curves[m_current].time[0]/1000000); // microseconds to seconds
         vect.push_back((m_curves[m_current].time[m_curves[m_current].time.size()-1]-m_curves[m_current].time.at(0))/1000000);
         vect.push_back(m_curves[m_current].distanceP/10); /* conversion from mm to cm */
         vect.push_back(m_curves[m_current].averageP*1000);
@@ -84,13 +88,17 @@ void Data::recordData(float t, float dist, float f)
 
         float deltaD = dist - last_distance;
         float deltaT = t - last_time;
-        deltaD *= 0.001;
-        deltaT /= 1000000;
+        float new_velocity = (deltaD*0.001) / (deltaT/1000000); // distance from mm to meters and time from micros to seconds
+        float deltaV = new_velocity - last_velocity;
         m_curves[m_current].speed.push_back(deltaD/deltaT);
+        m_curves[m_current].acceleration.push_back(deltaV/(deltaT/1000000));
+
+        last_velocity = new_velocity;
     }
 
     last_distance = dist;
     last_time = t;
+
 }
 
 

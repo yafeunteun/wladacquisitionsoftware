@@ -14,6 +14,7 @@ class Data : public QObject
         std::vector<float> time;
         std::vector<float> force;
         std::vector<float> speed;
+        std::vector<float> acceleration;
 
         float peakP;
         float timeToPeakP;
